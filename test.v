@@ -8,7 +8,7 @@ module tb;
   wire [7:0]data_inc;
   wire [3:0]a;
   wire [3:0]b;
-  wire [7:0]o;
+  wire [7:0]rca_o;
   wire [7:0]cla_o;
   wire [7:0]csa_o;
   wire [7:0]o_right;
@@ -22,12 +22,16 @@ module tb;
   wire rca_off;
   assign cla_off = |(cla_o ^ o_right);
   assign csa_off = |(csa_o ^ o_right);
-  assign rca_off = |(o ^ o_right);
+  assign rca_off = |(rca_o ^ o_right);
+
+  reg [7:0]rca_f;
+  reg [7:0]csa_f;
+  reg [7:0]cla_f;
 
   ma_mul_4b dut(
     .in_a(a),
     .in_b(b),
-    .out(o)    
+    .out(rca_o)    
   );
   csa_mul_4b dut_csa(
     .in_a(a),
@@ -39,17 +43,39 @@ module tb;
     .in_b(b),
     .out(cla_o) 
   );
+
+  always @(negedge rca_off) begin
+    if(csa_off & cla_off)begin
+      rca_f <= rca_f + 8'h1;
+    end
+  end
+  always @(negedge csa_off) begin
+    if(cla_off & rca_off)begin
+      csa_f <= csa_f + 8'h1;
+    end
+  end
+  always @(negedge cla_off) begin
+    if(csa_off & rca_off)begin
+      cla_f <= cla_f + 8'h1;
+    end
+  end
+
+
   initial begin
+    rca_f <= 8'h0;
+    csa_f <= 8'h0;
+    cla_f <= 8'h0;
     data = 8'h00;
     clk = 0;
     $dumpfile("tb_dut.vcd");
     $dumpvars(0, tb);
     //$monitor("a: %d   b: %d   o: %d   correct?: %b",a,b,o,correct);
-    #52000 $finish();
+    #52000 $display("rca: %d   csa: %d   cla: %d",rca_f,csa_f,cla_f);
+    $finish();
   end
   
   always @(*) begin
-    $display("a: %d   b: %d   o: %d   cla_o: %d   csa_o: %d   rca?: %b   cla?: %b   csa?: %b",a,b,o,cla_o,csa_o,rca_off,cla_off,csa_off);
+    //$display("a: %d   b: %d   o: %d   cla_o: %d   csa_o: %d   rca?: %b   cla?: %b   csa?: %b",a,b,rca_o,cla_o,csa_o,rca_off,cla_off,csa_off);
     #50 clk <= ~clk;
   end
   
