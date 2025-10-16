@@ -12,6 +12,8 @@ module tb;
   wire [7:0]cla_o;
   wire [7:0]csa_o;
   wire [7:0]o_right;
+  wire [3:0]bcd_o;
+  wire bcd_cout;
   assign a = data[3:0];
   assign b = data[7:4];
   assign data_inc = data + 8'h1;
@@ -27,6 +29,14 @@ module tb;
   reg [7:0]rca_f;
   reg [7:0]csa_f;
   reg [7:0]cla_f;
+
+  bcd_add dut_add(
+    .in_a(a),
+    .in_b(b),
+    .in_cin(1'b0),
+    .out_x(bcd_o),
+    .out_cout(bcd_cout)
+  );
 
   ma_mul_4b dut(
     .in_a(a),
