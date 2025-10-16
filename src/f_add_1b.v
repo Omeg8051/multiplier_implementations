@@ -17,7 +17,7 @@ module f_add_1b (
     assign #3 w0 = in_a ^ in_b;//xor
     assign #1 w1 = in_a & in_b;//and
 
-    assign #4 c_o = w1 | (c_i & w0);//and + or
+    assign #2 c_o = w1 | (c_i & w0);//and + or
     
     assign #3 s = c_i ^ w0;//xor
 
